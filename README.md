@@ -11,8 +11,8 @@ Built for the standard Israeli Hebrew (PC) layout — the same mapping macOS use
 | You typed (Hebrew layout was on) | The AI reads it as |
 |---|---|
 | `יקךךם` | `hello` |
-| `ביקבל איןד דבירןפא` | `check this script` |
-| `please ביקבל איןד דבירןפא for bugs` | `please check this script for bugs` (mixed input works) |
+| `ביקבל איןד דברןפא` | `check this script` |
+| `please ביקבל איןד דברןפא for bugs` | `please check this script for bugs` (mixed input works) |
 | `פןס איןד נוע` | `fix this bug` |
 | `תכתוב לי בעברית בבקשה` | *(real Hebrew — left as-is, no decode)* |
 

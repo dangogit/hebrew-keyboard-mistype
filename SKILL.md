@@ -7,7 +7,7 @@ compatibility: Works with Claude Code, Claude.ai, Codex, Cursor. Requires python
 
 # Hebrew Keyboard Mistype Recovery
 
-The user is `danielmini` — a Hebrew/English bilingual on macOS who routinely switches keyboard layouts. They sometimes type a request thinking the keyboard is on English when it's actually on Hebrew (or vice versa). The result is gibberish — Hebrew characters at QWERTY positions, or Latin characters at Hebrew positions. They want you to detect this, decode it, and proceed with what they actually meant — without making them retype.
+The user is a Hebrew/English bilingual who routinely switches keyboard layouts. They sometimes type a request thinking the keyboard is on English when it's actually on Hebrew (or vice versa). The result is gibberish — Hebrew characters at QWERTY positions, or Latin characters at Hebrew positions. They want you to detect this, decode it, and proceed with what they actually meant — without making them retype.
 
 ## When this triggers
 
@@ -27,10 +27,16 @@ The reverse case is rarer but possible: Latin-looking gibberish (`yje hjvf` styl
 Use the bundled decode script — don't translate by hand. The mapping is the standard Israeli Hebrew (PC) layout, which is what macOS uses for the "Hebrew" and "Hebrew – QWERTY" input sources.
 
 ```bash
-python3 ~/agent-skills/hebrew-keyboard-mistype/scripts/decode.py "<the suspected text>"
+DECODE=$(ls ~/.claude/skills/hebrew-keyboard-mistype/scripts/decode.py \
+            ~/.agents/skills/hebrew-keyboard-mistype/scripts/decode.py \
+            ~/.codex/skills/hebrew-keyboard-mistype/scripts/decode.py \
+            ~/agent-skills/hebrew-keyboard-mistype/scripts/decode.py 2>/dev/null | head -1)
+python3 "$DECODE" "<the suspected text>"
 # For the reverse case (English chars where Hebrew was meant):
-python3 ~/agent-skills/hebrew-keyboard-mistype/scripts/decode.py "<text>" --reverse
+python3 "$DECODE" "<text>" --reverse
 ```
+
+The skill directory is wherever the user installed it, so resolve the script path instead of hardcoding one. The snippet above checks the usual locations in order and takes the first hit; if none match, find the script under the skill directory you were loaded from.
 
 Pass the suspect chunk (or the whole message — non-Hebrew chars pass through unchanged, so it's safe to feed mixed content). The script prints the decoded text to stdout.
 
@@ -67,7 +73,7 @@ Decode: `hello, can you tell me a joke?`
 Your response opens with: *"Reading that as: 'hello, can you tell me a joke?' (Hebrew layout was on)."* Then answer the joke request.
 
 **Example 2 — mistype mixed with English**
-User: `please ביקבל איןד דבירןפא for bugs`
+User: `please ביקבל איןד דברןפא for bugs`
 Decode of the Hebrew chunk: `check this script`
 Your response opens with: *"Reading the Hebrew chunk as 'check this script'."* Then review the script.
 
