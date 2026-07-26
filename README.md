@@ -2,9 +2,9 @@
 
 A Claude Code / Claude.ai / Codex skill that recovers messages typed with the wrong keyboard layout.
 
-You meant to type `hello`, but the keyboard was on Hebrew, so what came out was `יקךךם`. This skill teaches the AI to recognize that pattern, decode the Hebrew characters back to the English keys at the same physical QWERTY position, and proceed with your actual request — no retyping needed.
+You meant to type `hello`, but the keyboard was on Hebrew, so what came out was `יקךךם`. This skill teaches the AI to recognize that pattern, decode the Hebrew characters back to the English keys at the same physical QWERTY position, and proceed with your actual request, no retyping needed.
 
-Built for the standard Israeli Hebrew (PC) layout — the same mapping macOS uses for its "Hebrew" and "Hebrew – QWERTY" input sources.
+Built for the standard Israeli Hebrew (PC) layout, the same mapping macOS uses for its "Hebrew" and "Hebrew – QWERTY" input sources.
 
 ## What it does
 
@@ -14,13 +14,13 @@ Built for the standard Israeli Hebrew (PC) layout — the same mapping macOS use
 | `ביקבל איןד דברןפא` | `check this script` |
 | `please ביקבל איןד דברןפא for bugs` | `please check this script for bugs` (mixed input works) |
 | `פןס איןד נוע` | `fix this bug` |
-| `תכתוב לי בעברית בבקשה` | *(real Hebrew — left as-is, no decode)* |
+| `תכתוב לי בעברית בבקשה` | *(real Hebrew, left as-is, no decode)* |
 
 The decoder also supports `--reverse` for the rarer case where you wanted Hebrew but the keyboard was on English.
 
 ## How it works
 
-The skill ships with `SKILL.md` (instructions for the AI on when and how to trigger) plus a deterministic Python decoder script. When the AI detects Hebrew letters in a context where English makes more sense — gibberish-looking blobs, mixes with code or filenames, final-form letters appearing mid-word — it runs the decoder, acknowledges the recovered text in one short line, and continues with the task.
+The skill ships with `SKILL.md` (instructions for the AI on when and how to trigger) plus a deterministic Python decoder script. When the AI detects Hebrew letters in a context where English makes more sense (gibberish-looking blobs, mixes with code or filenames, final-form letters appearing mid-word), it runs the decoder, acknowledges the recovered text in one short line, and continues with the task.
 
 A strong "tell" for a keyboard mistype is two final-form letters in a row (e.g., `ךך` from `ll` in `hello`), which is illegal in real Hebrew spelling.
 
@@ -42,7 +42,7 @@ npx skills add dangogit/hebrew-keyboard-mistype
 
 ### Optional: auto-detect hook
 
-For the strongest trigger guarantee, add this to your `~/.claude/settings.json` under `hooks` — it runs the decoder on every prompt that contains Hebrew characters and injects a one-line hint to Claude:
+For the strongest trigger guarantee, add this to your `~/.claude/settings.json` under `hooks`. It runs the decoder on every prompt that contains Hebrew characters and injects a one-line hint to Claude:
 
 ```json
 {
@@ -97,4 +97,4 @@ MIT.
 
 ## Contributing
 
-PRs welcome — especially for additional layout variants (Hebrew – SI 1452, Hebrew – Hebrew script, custom user layouts), better mistype heuristics, or translations of the SKILL.md.
+PRs welcome, especially for additional layout variants (Hebrew – SI 1452, Hebrew – Hebrew script, custom user layouts), better mistype heuristics, or translations of the SKILL.md.
