@@ -2,9 +2,11 @@
 
 A Claude Code / Claude.ai / Codex skill that recovers messages typed with the wrong keyboard layout.
 
+This standalone repository remains fully installable. The canonical version also lives in the [public skill collection](https://github.com/dangogit/agent-skills/tree/main/skills/hebrew-keyboard-mistype), where it is maintained alongside Daniel Goldman's other public skills.
+
 You meant to type `hello`, but the keyboard was on Hebrew, so what came out was `יקךךם`. This skill teaches the AI to recognize that pattern, decode the Hebrew characters back to the English keys at the same physical QWERTY position, and proceed with your actual request, no retyping needed.
 
-Built for the standard Israeli Hebrew (PC) layout, the same mapping macOS uses for its "Hebrew" and "Hebrew – QWERTY" input sources.
+Built for the standard Israeli Hebrew keyboard layout.
 
 ## What it does
 
@@ -13,7 +15,7 @@ Built for the standard Israeli Hebrew (PC) layout, the same mapping macOS uses f
 | `יקךךם` | `hello` |
 | `ביקבל איןד דברןפא` | `check this script` |
 | `please ביקבל איןד דברןפא for bugs` | `please check this script for bugs` (mixed input works) |
-| `פןס איןד נוע` | `fix this bug` |
+| `כןס איןד נוע` | `fix this bug` |
 | `תכתוב לי בעברית בבקשה` | *(real Hebrew, left as-is, no decode)* |
 
 The decoder also supports `--reverse` for the rarer case where you wanted Hebrew but the keyboard was on English.
@@ -62,7 +64,7 @@ For the strongest trigger guarantee, add this to your `~/.claude/settings.json` 
 }
 ```
 
-The hook stays silent (zero output, ~5 ms) on prompts without Hebrew, so it doesn't add latency to normal English messages.
+The hook stays silent on prompts without Hebrew.
 
 ## Manual use
 
@@ -71,7 +73,7 @@ The decoder script is usable on its own:
 ```bash
 python3 scripts/decode.py "יקךךם"           # -> hello
 python3 scripts/decode.py "yje hjvf" --reverse   # -> attempt to recover Hebrew from English keys
-echo "פןס איןד נוע" | python3 scripts/decode.py -   # read from stdin
+echo "כןס איןד נוע" | python3 scripts/decode.py -   # read from stdin
 ```
 
 ## The mapping
