@@ -1,58 +1,55 @@
 #!/usr/bin/env python3
-"""Claude Code UserPromptSubmit hook for hebrew-keyboard-mistype.
+"""Claude Code UserPromptSubmit hook for Hebrew keyboard mistypes."""
 
-Fires on every user prompt. If the prompt contains Hebrew characters, decodes them
-back to the English keys at the same QWERTY position and injects an `additionalContext`
-note so Claude knows it might be a keyboard-layout mistype and which skill to use.
+from __future__ import annotations
 
-Stays silent (exit 0, no output) when the prompt has no Hebrew chars — fast path for
-the common case so we don't add latency to normal English messages.
-"""
 import json
-import os
 import sys
+from pathlib import Path
 
-HEBREW_START, HEBREW_END = 0x0590, 0x05FF
+
+HEBREW_START = 0x0590
+HEBREW_END = 0x05FF
 
 
-def main() -> int:
+def contains_hebrew(text: str) -> bool:
+    return any(HEBREW_START <= ord(character) <= HEBREW_END for character in text)
+
+
+def cli() -> int:
     try:
-        data = json.load(sys.stdin)
-    except json.JSONDecodeError:
-        return 0  # malformed input, don't block the prompt
+        payload = json.load(sys.stdin)
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return 0
+    if not isinstance(payload, dict):
+        return 0
 
-    prompt = data.get("prompt", "") or ""
-    if not any(HEBREW_START <= ord(c) <= HEBREW_END for c in prompt):
-        return 0  # no Hebrew, nothing to suggest
+    prompt = payload.get("prompt", "")
+    if not isinstance(prompt, str) or not contains_hebrew(prompt):
+        return 0
 
-    # Decode using the bundled mapping
-    here = os.path.dirname(os.path.abspath(__file__))
-    sys.path.insert(0, here)
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
     try:
-        from decode import heb_to_en
+        from decode import hebrew_to_english
     except ImportError:
-        return 0  # decoder missing, fail silent rather than block
+        return 0
 
-    decoded = heb_to_en(prompt)
-
+    decoded = hebrew_to_english(prompt)
+    context = (
+        "[hebrew-keyboard-mistype] The prompt contains Hebrew characters. "
+        "If they do not form coherent Hebrew, consider this same-keyboard-position "
+        f"English candidate: {decoded!r}. Use it only when it fits the conversation; "
+        "otherwise treat the original as Hebrew."
+    )
     output = {
         "hookSpecificOutput": {
             "hookEventName": "UserPromptSubmit",
-            "additionalContext": (
-                "[hebrew-keyboard-mistype hook] The user's message contains Hebrew characters. "
-                "If those characters don't form real Hebrew words, the user likely typed with "
-                "the keyboard accidentally set to Hebrew. Decoded back to the English keys at "
-                f"the same QWERTY positions: {decoded!r}. "
-                "If the decoded text reads as a coherent English request, treat it as the user's "
-                "actual intent, acknowledge it in one short line, and proceed. "
-                "If the decoded text is also gibberish, the user probably meant real Hebrew — "
-                "respond accordingly. See the hebrew-keyboard-mistype skill for the full mapping."
-            ),
+            "additionalContext": context,
         }
     }
-    print(json.dumps(output))
+    print(json.dumps(output, ensure_ascii=False))
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(cli())
